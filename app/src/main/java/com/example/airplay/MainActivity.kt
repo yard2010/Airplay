@@ -74,6 +74,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener  {
                 currentX += 0.1;
                 this.findViewById<TextView>(R.id.accelTextView).text = "Accel: $currentAcceleration"
                 this.series.appendData(DataPoint(currentX, currentAcceleration.toDouble()), true, 200000)
+
+            }
+
+            if (abs(currentAcceleration) > 10) {
+                Log.v("MAIN", "Acceleration Threshold!")
             }
 
             // TODO: Might be unnecessary
