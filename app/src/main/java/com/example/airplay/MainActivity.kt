@@ -5,7 +5,6 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -26,6 +25,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener  {
     private var velocity = FloatArray(3) { 0f }
     private var position = FloatArray(3) { 0f }
     private var acceleration = FloatArray(3) { 0f }
+
+    private var isCurrentlyMoving = false
+    private var movementsCount = 0
 
     private val series = LineGraphSeries<DataPoint>()
     private var currentX = 0.0;
@@ -48,6 +50,22 @@ class MainActivity : AppCompatActivity(), SensorEventListener  {
         graph.viewport.setMaxX(50.0)
         graph.viewport.isXAxisBoundsManual = true
         graph.addSeries(this.series)
+    }
+
+    fun enterMoveState() {
+        if (isCurrentlyMoving) {
+            return
+        }
+        isCurrentlyMoving = true
+        movementsCount++
+        Log.v("MAIN", "Acceleration Threshold!")
+    }
+
+    fun exitMoveState() {
+        if (!isCurrentlyMoving) {
+            return
+        }
+        isCurrentlyMoving = false
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
@@ -77,8 +95,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener  {
 
             }
 
-            if (abs(currentAcceleration) > 10) {
-                Log.v("MAIN", "Acceleration Threshold!")
+            if (abs(currentAcceleration) > 20) {
+                enterMoveState()
+            }
+            else {
+                exitMoveState()
             }
 
             // TODO: Might be unnecessary
