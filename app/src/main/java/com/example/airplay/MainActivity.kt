@@ -5,6 +5,8 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.media.MediaPlayer
+import android.media.RingtoneManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -17,9 +19,12 @@ import kotlin.math.abs
 import kotlin.math.sqrt
 
 
+const val FORCE_THRESHOLD = 38
+
 class MainActivity : AppCompatActivity(), SensorEventListener  {
 
     private lateinit var sensorManager: SensorManager
+    private lateinit var mediaPlayer: MediaPlayer
 
     private var gravity = FloatArray(3) { 0f }
     private var velocity = FloatArray(3) { 0f }
@@ -46,6 +51,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener  {
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_FASTEST)
 
+        mediaPlayer = MediaPlayer.create(applicationContext, R.raw.sfx)
+
         val graph = findViewById<GraphView>(R.id.graph)
         graph.viewport.setMaxX(50.0)
         graph.viewport.isXAxisBoundsManual = true
@@ -58,6 +65,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener  {
         }
         isCurrentlyMoving = true
         movementsCount++
+        val moveCounterTextView = findViewById<TextView>(R.id.moveCounter)
+        moveCounterTextView.text = movementsCount.toString()
+        mediaPlayer.start()
         Log.v("MAIN", "Acceleration Threshold!")
     }
 
@@ -95,7 +105,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener  {
 
             }
 
-            if (abs(currentAcceleration) > 20) {
+            if (abs(currentAcceleration) > FORCE_THRESHOLD) {
                 enterMoveState()
             }
             else {
